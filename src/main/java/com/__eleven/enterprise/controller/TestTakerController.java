@@ -7,10 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/test-takers")
@@ -23,5 +22,10 @@ public class TestTakerController {
     public ResponseEntity<TestTaker>  createTestTaker (@RequestBody CreateTestTakerRequest req){
         TestTaker createdTestTaker = testTakerService.createTestTaker(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTestTaker);
+    }
+
+    @GetMapping("/by-schedule/{scheduleId}")
+    public  ResponseEntity<List<TestTaker>> fetchBySchedule(@PathVariable Long scheduleId){
+     return ResponseEntity.ok(testTakerService.getBySchedule(scheduleId));
     }
 }
