@@ -8,30 +8,32 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="users")
+@Table(
+        name = "test_taker",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_test_taker_user_schedule",
+                columnNames = {"username", "schedule_id"}))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class TestTaker {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", nullable = false, length = 255)
-    private String fullName;
-
-    @Column(name = "username", nullable = false, length = 20)
+    @Column(name="username", nullable = false, length = 20)
     private String username;
 
-    @Column(name = "organization_id", nullable = false)
-    private String organizationId;
+    @Column(name = "schedule_id", nullable = false)
+    private Long scheduleId;
 
-    @Column(name = "created_at", updatable = false )
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
 }
