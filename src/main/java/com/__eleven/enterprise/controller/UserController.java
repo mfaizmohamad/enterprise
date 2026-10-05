@@ -1,6 +1,8 @@
 package com.__eleven.enterprise.controller;
 
+import com.__eleven.enterprise.entity.Organization;
 import com.__eleven.enterprise.entity.User;
+import com.__eleven.enterprise.service.OrganizationService;
 import com.__eleven.enterprise.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final OrganizationService organizationService;
 
     @PostMapping("/add-user")
     public ResponseEntity<User> createUser(@RequestBody User user){
@@ -26,5 +29,11 @@ public class UserController {
     public ResponseEntity<List<User>> getALlUser(){
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
+    }
+
+    @PostMapping("/create-org")
+    public ResponseEntity<Organization> createOrg(@RequestBody Organization organization){
+        Organization createdOrganization = organizationService.createOrganization(organization);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrganization);
     }
 }
