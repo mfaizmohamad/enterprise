@@ -8,6 +8,7 @@ import com.__eleven.enterprise.repository.ScheduleRepository;
 import com.__eleven.enterprise.repository.TestTakerRepository;
 import com.__eleven.enterprise.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TestTakerService {
 
     private final TestTakerRepository testTakerRepository;
@@ -24,12 +26,10 @@ public class TestTakerService {
     @Transactional
     public TestTaker createTestTaker(CreateTestTakerRequest req){
 
-        // 1. Resolve the schedule by name → ID
         Schedule schedule = scheduleRepository.findByName(req.getScheduleName())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Schedule not found: " + req.getScheduleName()));
 
-        // 2. Create the user (or reuse an existing one)
         User user = userRepository.findByUsername(req.getUsername())
                 .orElseGet(() -> {
                     User newUser = new User();
@@ -39,17 +39,19 @@ public class TestTakerService {
                     return userRepository.save(newUser);
                 });
 
-        // 3. Prevent duplicate enrollment
         if (testTakerRepository.existsByUsernameAndScheduleId(user.getId(), schedule.getId())) {
             throw new IllegalStateException(
                     "User " + user.getUsername() + " is already enrolled in " + schedule.getName());
         }
 
-        // 4. Create the test_taker row
         TestTaker testTaker = new TestTaker();
         testTaker.setUsername(user.getUsername());
         testTaker.setScheduleId(schedule.getId());
-        return testTakerRepository.save(testTaker);
+        TestTaker saved = testTakerRepository.save(testTaker);
+
+        log.info("Test Taker created: id={}, username={}", saved.getId(), saved.getUsername());
+
+        return saved;
     }
 
     public List<TestTaker> getAllTestTakers() {
@@ -57,6 +59,15 @@ public class TestTakerService {
     }
 
     public List<TestTaker> getBySchedule(Long scheduleId) {
-        return testTakerRepository.findByScheduleId(scheduleId);
+
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> {
+                    log.warn("Schedule not found id={}", scheduleId);
+                    return new IllegalArgumentException("Schedule not found id: " + scheduleId);
+                });
+
+        List<TestTaker> testTakers = testTakerRepository.findByScheduleId(scheduleId);
+        log.info("Fetch {} by schedule {} id={}", testTakers.size(),schedule.getName(), scheduleId);
+        return testTakers;
     }
 }

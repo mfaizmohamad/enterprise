@@ -3,6 +3,7 @@ package com.__eleven.enterprise.controller;
 import com.__eleven.enterprise.dto.CreateTestTakerRequest;
 import com.__eleven.enterprise.entity.TestTaker;
 import com.__eleven.enterprise.service.TestTakerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,7 +20,7 @@ public class TestTakerController {
     private final TestTakerService testTakerService;
 
     @PostMapping("/create")
-    public ResponseEntity<TestTaker>  createTestTaker (@RequestBody CreateTestTakerRequest req){
+    public ResponseEntity<TestTaker>  createTestTaker (@Valid @RequestBody CreateTestTakerRequest req){
         TestTaker createdTestTaker = testTakerService.createTestTaker(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTestTaker);
     }
@@ -28,4 +29,11 @@ public class TestTakerController {
     public  ResponseEntity<List<TestTaker>> fetchBySchedule(@PathVariable Long scheduleId){
      return ResponseEntity.ok(testTakerService.getBySchedule(scheduleId));
     }
+
+    @GetMapping("/all-test-takers")
+    public ResponseEntity<List<TestTaker>> fetchAllTestTakers(){
+        List<TestTaker> testTakers = testTakerService.getAllTestTakers();
+        return ResponseEntity.ok(testTakers);
+    }
+
 }
